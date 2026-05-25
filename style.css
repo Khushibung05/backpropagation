@@ -3,12 +3,12 @@
 .stApp{
     background: linear-gradient(
     135deg,
-    #020617,
-    #0f172a,
-    #111827
+    #586723,
+    #1c99c0,
+    #d3436c
     );
 
-    color:white;
+    color:rgb(137, 16, 109);
 }
 
 /* Remove default white sections */
