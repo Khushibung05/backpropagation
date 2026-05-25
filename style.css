@@ -1,168 +1,163 @@
-/* Full app background */
-
 .stApp{
     background: linear-gradient(
-    135deg,
-    #586723,
-    #1c99c0,
-    #d3436c
+        135deg,
+        #0f172a,
+        #1e293b,
+        #312e81
     );
 
-    color:rgb(137, 16, 109);
+    color:white;
 }
 
-/* Remove default white sections */
+/* Main container */
 
 .block-container{
     padding-top:2rem;
+    padding-bottom:2rem;
+    max-width:1200px;
 }
 
 /* Title */
 
-.title{
+.main-title{
     text-align:center;
-    font-size:42px;
-    font-weight:bold;
-    color:#ffffff;
-    margin-bottom:8px;
+    font-size:52px;
+    font-weight:800;
+    color:white;
+    margin-bottom:10px;
 }
 
 /* Subtitle */
 
-.subtitle{
+.sub-title{
     text-align:center;
-    font-size:18px;
+    font-size:20px;
     color:#cbd5e1;
-    margin-bottom:30px;
+    margin-bottom:40px;
 }
 
-
-/* Card styling */
+/* Cards */
 
 .card{
+    background:rgba(17,24,39,0.85);
 
-    background:#111827;
+    padding:22px;
 
-    padding:25px;
+    border-radius:22px;
 
-    border-radius:20px;
+    border:1px solid rgba(255,255,255,0.08);
 
-    border:1px solid #374151;
+    backdrop-filter: blur(10px);
+
+    margin-bottom:20px;
 
     box-shadow:
-    0px 4px 15px
-    rgba(0,0,0,.4);
-
-    margin-bottom:25px;
-
-    color:white;
+    0px 6px 20px rgba(0,0,0,0.35);
 }
 
 /* Card headings */
 
-.card h3,
+.card h1,
 .card h2,
-.card h1{
-
+.card h3{
     color:#60a5fa;
+    margin:0;
 }
-
-
-/* Paragraphs */
-
-.card p,
-.card li{
-
-    color:#e5e7eb;
-
-    font-size:16px;
-}
-
-
-/* Button */
-
-.stButton>button{
-
-    background:
-    linear-gradient(
-    90deg,
-    #2563eb,
-    #3b82f6
-    );
-
-    color:white;
-
-    border:none;
-
-    border-radius:12px;
-
-    width:100%;
-
-    height:50px;
-
-    font-size:18px;
-
-    font-weight:bold;
-}
-
 
 /* Metrics */
 
 [data-testid="metric-container"]{
+    background:rgba(17,24,39,0.85);
 
-    background:#111827;
-
-    border:1px solid #374151;
+    border:1px solid rgba(255,255,255,0.06);
 
     padding:20px;
 
-    border-radius:15px;
+    border-radius:18px;
 
     box-shadow:
-    0px 4px 10px
-    rgba(0,0,0,.3);
+    0px 4px 15px rgba(0,0,0,0.3);
 }
 
-/* metric text */
+/* Metric text */
 
 [data-testid="metric-container"] label{
-
     color:#cbd5e1;
 }
 
 [data-testid="metric-container"] div{
-
     color:white;
 }
 
-
 /* Inputs */
 
-.stSelectbox,
-.stNumberInput,
-.stSlider{
-
-    background:#111827;
+.stSelectbox label,
+.stSlider label,
+.stNumberInput label{
+    color:white !important;
+    font-weight:600;
 }
 
+/* Buttons */
+
+.stButton > button{
+    width:100%;
+
+    height:55px;
+
+    border:none;
+
+    border-radius:15px;
+
+    background:linear-gradient(
+        90deg,
+        #2563eb,
+        #7c3aed
+    );
+
+    color:white;
+
+    font-size:18px;
+
+    font-weight:bold;
+
+    transition:0.3s;
+}
+
+.stButton > button:hover{
+    transform:scale(1.02);
+}
 
 /* Success */
 
 .stSuccess{
-
-    border-radius:10px;
+    border-radius:12px;
 }
-
 
 /* Error */
 
 .stError{
-
-    border-radius:10px;
+    border-radius:12px;
 }
 
 /* Footer */
 
+.footer{
+    text-align:center;
+
+    margin-top:40px;
+
+    color:#cbd5e1;
+
+    font-size:15px;
+}
+
+/* Hide Streamlit */
+
 footer{
+    visibility:hidden;
+}
+
+#MainMenu{
     visibility:hidden;
 }

@@ -1,222 +1,214 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.neural_network import MLPClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score,confusion_matrix
 import matplotlib.pyplot as plt
 
-# ---------------------------------
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.ensemble import RandomForestClassifier
+
+# ------------------------------------------------
 # PAGE CONFIG
-# ---------------------------------
+# ------------------------------------------------
 
 st.set_page_config(
-    page_title="Titanic Survival Prediction",
+    page_title="Titanic Survival Predictor",
     page_icon="🚢",
     layout="wide"
 )
 
-# ---------------------------------
+# ------------------------------------------------
 # LOAD CSS
-# ---------------------------------
+# ------------------------------------------------
 
 with open("style.css") as f:
-
     st.markdown(
         f"<style>{f.read()}</style>",
         unsafe_allow_html=True
     )
 
-# ---------------------------------
+# ------------------------------------------------
 # LOAD DATA
-# ---------------------------------
+# ------------------------------------------------
 
-df=pd.read_csv(
-    "titanic.csv"
-)
+df = pd.read_csv("titanic.csv")
 
-df["Age"]=df["Age"].fillna(
-    df["Age"].mean()
-)
+# ------------------------------------------------
+# DATA CLEANING
+# ------------------------------------------------
 
-features=[
+df["Age"] = df["Age"].fillna(df["Age"].median())
+df["Fare"] = df["Fare"].fillna(df["Fare"].median())
+df["Embarked"] = df["Embarked"].fillna(df["Embarked"].mode()[0])
+
+# LABEL ENCODING
+
+le = LabelEncoder()
+
+df["Sex"] = le.fit_transform(df["Sex"])
+df["Embarked"] = le.fit_transform(df["Embarked"])
+
+# FAMILY SIZE
+
+df["FamilySize"] = df["SibSp"] + df["Parch"] + 1
+
+# FEATURES
+
+features = [
     "Pclass",
+    "Sex",
     "Age",
-    "Fare"
+    "Fare",
+    "Embarked",
+    "FamilySize"
 ]
 
-X=df[features]
+X = df[features]
+y = df["Survived"]
 
-y=df["Survived"]
+# ------------------------------------------------
+# SPLIT
+# ------------------------------------------------
 
-# ---------------------------------
-# NORMALIZATION
-# ---------------------------------
-
-scaler=MinMaxScaler()
-
-X=scaler.fit_transform(X)
-
-# ---------------------------------
-# TRAIN TEST SPLIT
-# ---------------------------------
-
-X_train,X_test,y_train,y_test=train_test_split(
+X_train, X_test, y_train, y_test = train_test_split(
     X,
     y,
     test_size=0.2,
     random_state=42
 )
 
-# ---------------------------------
+# ------------------------------------------------
 # MODEL
-# ---------------------------------
+# ------------------------------------------------
 
 @st.cache_resource
 def train_model():
 
-    model=MLPClassifier(
-
-        hidden_layer_sizes=(8,4),
-
-        activation='relu',
-
-        max_iter=500,
-
+    model = RandomForestClassifier(
+        n_estimators=300,
+        max_depth=8,
         random_state=42
     )
 
-    model.fit(
-        X_train,
-        y_train
-    )
+    model.fit(X_train, y_train)
 
     return model
 
+model = train_model()
 
-model=train_model()
-
-# ---------------------------------
+# ------------------------------------------------
 # EVALUATION
-# ---------------------------------
+# ------------------------------------------------
 
-y_pred=model.predict(
-    X_test
-)
+y_pred = model.predict(X_test)
 
-accuracy=accuracy_score(
-    y_test,
-    y_pred
-)
+accuracy = accuracy_score(y_test, y_pred)
 
-cm=confusion_matrix(
-    y_test,
-    y_pred
-)
+cm = confusion_matrix(y_test, y_pred)
 
-# ---------------------------------
+# ------------------------------------------------
 # HEADER
-# ---------------------------------
+# ------------------------------------------------
 
-st.markdown(
-"""
-<div class='title'>
-🚢 Titanic Survival Prediction System
+st.markdown("""
+<div class="main-title">
+🚢 Titanic Survival Prediction
 </div>
-""",
-unsafe_allow_html=True
-)
+""", unsafe_allow_html=True)
 
-st.markdown(
-"""
-<div class='subtitle'>
-Deep Learning Based Passenger Survival Prediction
+st.markdown("""
+<div class="sub-title">
+Machine Learning Based Smart Passenger Survival Analysis
 </div>
-""",
-unsafe_allow_html=True
-)
+""", unsafe_allow_html=True)
 
-a,b,c=st.columns([2,1,2])
+# ------------------------------------------------
+# TOP METRICS
+# ------------------------------------------------
 
-with b:
+m1, m2, m3 = st.columns(3)
 
-    st.image(
-        "https://cdn-icons-png.flaticon.com/512/2784/2784445.png",
-        width=100
+with m1:
+    st.metric("Model Accuracy", f"{accuracy*100:.2f}%")
+
+with m2:
+    st.metric("Dataset Size", len(df))
+
+with m3:
+    st.metric("Testing Samples", len(y_test))
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# ------------------------------------------------
+# MAIN LAYOUT
+# ------------------------------------------------
+
+left, right = st.columns([1.1, 1])
+
+# ------------------------------------------------
+# LEFT SIDE
+# ------------------------------------------------
+
+with left:
+
+    st.markdown("""
+    <div class="card">
+    <h2>Passenger Information</h2>
+    </div>
+    """, unsafe_allow_html=True)
+
+    pclass = st.selectbox(
+        "Passenger Class",
+        [1, 2, 3]
     )
 
-# ---------------------------------
-# DESCRIPTION
-# ---------------------------------
-
-st.markdown(
-"""
-<div class='card'>
-
-<h3>Project Description</h3>
-
-<p>
-This project predicts Titanic passenger survival
-using Artificial Neural Network.
-</p>
-
-<p>Technologies:</p>
-
-<p>✅ ANN</p>
-<p>✅ Streamlit</p>
-<p>✅ Accuracy Metrics</p>
-<p>✅ Confusion Matrix</p>
-
-</div>
-""",
-unsafe_allow_html=True
-)
-
-# ---------------------------------
-# MODEL PERFORMANCE
-# ---------------------------------
-
-st.markdown(
-"""
-<div class='card'>
-<h3>Model Performance</h3>
-</div>
-""",
-unsafe_allow_html=True
-)
-
-x,y=st.columns(2)
-
-with x:
-
-    st.metric(
-        "Accuracy",
-        f"{accuracy*100:.2f}%"
+    sex = st.selectbox(
+        "Gender",
+        ["Male", "Female"]
     )
 
-with y:
-
-    st.metric(
-        "Testing Samples",
-        len(y_test)
+    age = st.slider(
+        "Age",
+        1,
+        80,
+        25
     )
 
-# ---------------------------------
-# SMALL CONFUSION MATRIX
-# ---------------------------------
-
-st.subheader(
-    "Confusion Matrix"
-)
-
-c1,c2,c3=st.columns([1,2,1])
-
-with c2:
-
-    fig,ax=plt.subplots(
-        figsize=(2.5,2.5)
+    fare = st.slider(
+        "Fare",
+        0,
+        600,
+        50
     )
+
+    embarked = st.selectbox(
+        "Embarked Port",
+        ["S", "C", "Q"]
+    )
+
+    family = st.slider(
+        "Family Size",
+        1,
+        10,
+        1
+    )
+
+    predict = st.button("Predict Survival")
+
+# ------------------------------------------------
+# RIGHT SIDE
+# ------------------------------------------------
+
+with right:
+
+    st.markdown("""
+    <div class="card">
+    <h2>Confusion Matrix</h2>
+    </div>
+    """, unsafe_allow_html=True)
+
+    fig, ax = plt.subplots(figsize=(4,4))
 
     ax.imshow(cm)
 
@@ -226,168 +218,101 @@ with c2:
             ax.text(
                 j,
                 i,
-                cm[i,j],
-                ha='center',
-                va='center'
+                str(cm[i, j]),
+                ha="center",
+                va="center",
+                fontsize=16
             )
 
-    ax.set_xlabel(
-        "Predicted",
-        fontsize=8
-    )
+    ax.set_xticks([0,1])
+    ax.set_yticks([0,1])
 
-    ax.set_ylabel(
-        "Actual",
-        fontsize=8
-    )
+    ax.set_xticklabels(["No", "Yes"])
+    ax.set_yticklabels(["No", "Yes"])
 
-    ax.tick_params(
-        labelsize=8
-    )
+    ax.set_xlabel("Predicted")
+    ax.set_ylabel("Actual")
 
-    st.pyplot(
-        fig,
-        use_container_width=False
-    )
+    st.pyplot(fig)
 
-# ---------------------------------
-# INPUT FORM
-# ---------------------------------
+# ------------------------------------------------
+# PREDICTION
+# ------------------------------------------------
 
-st.markdown(
-"""
-<div class='card'>
-<h3>Passenger Input Form</h3>
-</div>
-""",
-unsafe_allow_html=True
-)
+if predict:
 
-col1,col2,col3=st.columns(3)
+    sex_val = 1 if sex == "Male" else 0
 
-with col1:
+    embarked_map = {
+        "S": 2,
+        "C": 0,
+        "Q": 1
+    }
 
-    pclass=st.selectbox(
-        "Passenger Class",
-        [1,2,3]
-    )
+    embarked_val = embarked_map[embarked]
 
-with col2:
+    user_data = pd.DataFrame([{
+        "Pclass": pclass,
+        "Sex": sex_val,
+        "Age": age,
+        "Fare": fare,
+        "Embarked": embarked_val,
+        "FamilySize": family
+    }])
 
-    age=st.slider(
-        "Age",
-        1,
-        80,
-        24
-    )
+    prediction = model.predict(user_data)[0]
 
-with col3:
+    probability = model.predict_proba(user_data)[0]
 
-    fare=st.number_input(
-        "Fare",
-        0.0,
-        600.0,
-        50.0
-    )
+    survive_prob = probability[1] * 100
+    nonsurvive_prob = probability[0] * 100
 
-# ---------------------------------
-# PREDICT
-# ---------------------------------
+    st.markdown("<br>", unsafe_allow_html=True)
 
-if st.button(
-    "Predict Survival"
-):
-
-    user=np.array([
-        [pclass,age,fare]
-    ])
-
-    user=scaler.transform(
-        user
-    )
-
-    prob=model.predict_proba(
-        user
-    )[0][1]
-
-    non_prob=1-prob
-
-    if prob>0.5:
-
-        result="Survived"
+    if prediction == 1:
 
         st.success(
-            "Passenger likely survives"
+            f"Passenger is likely to SURVIVE ({survive_prob:.2f}%)"
         )
 
     else:
 
-        result="Not Survived"
-
         st.error(
-            "Passenger likely may not survive"
+            f"Passenger is likely to NOT SURVIVE ({nonsurvive_prob:.2f}%)"
         )
 
-    confidence=max(
-        prob,
-        non_prob
-    )*100
+    r1, r2, r3 = st.columns(3)
 
-    a,b,c=st.columns(3)
+    with r1:
+        st.metric("Survival Chance", f"{survive_prob:.2f}%")
 
-    with a:
+    with r2:
+        st.metric("Non Survival", f"{nonsurvive_prob:.2f}%")
 
+    with r3:
         st.metric(
             "Prediction",
-            result
+            "Survived" if prediction == 1 else "Not Survived"
         )
 
-    with b:
+    st.markdown("<br>", unsafe_allow_html=True)
 
-        st.metric(
-            "Survival Probability",
-            f"{prob*100:.2f}%"
-        )
+    fig2, ax2 = plt.subplots(figsize=(4,4))
 
-    with c:
-
-        st.metric(
-            "Confidence Score",
-            f"{confidence:.2f}%"
-        )
-
-# ---------------------------------
-# SMALL PIE CHART
-# ---------------------------------
-
-    st.subheader(
-        "Probability Visualization"
+    ax2.pie(
+        [survive_prob, nonsurvive_prob],
+        labels=["Survive", "Not Survive"],
+        autopct="%1.1f%%"
     )
 
-    p1,p2,p3=st.columns([1,2,1])
+    st.pyplot(fig2)
 
-    with p2:
+# ------------------------------------------------
+# FOOTER
+# ------------------------------------------------
 
-        fig,ax=plt.subplots(
-            figsize=(3,3)
-        )
-
-        ax.pie(
-            [prob,non_prob],
-            labels=[
-                "Survival",
-                "Non Survival"
-            ],
-            autopct="%1.1f%%"
-        )
-
-        st.pyplot(
-            fig,
-            use_container_width=False
-        )
-
-st.markdown("---")
-
-st.caption(
-    "Built using ANN + Streamlit"
-)
+st.markdown("""
+<div class="footer">
+Built with ❤️ using Streamlit & Machine Learning
+</div>
+""", unsafe_allow_html=True)
